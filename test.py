@@ -54,6 +54,10 @@ class MyAppTests(unittest.TestCase):
         response = self.app.post("/students", json=data)
         self.assertEqual(response.status_code, 201)
     
+    def test_delete_student(self):
+        response = self.app.delete("/students/201980081")
+        self.assertEqual(response.status_code, 200)
+        
     
 if __name__ == "__main__":
     unittest.main()

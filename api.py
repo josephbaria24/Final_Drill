@@ -42,15 +42,28 @@ def data_fetch(query):
 @app.route("/students", methods=["GET"])
 @login_reqiured
 def get_students():
+    firstname = request.args.get("firstname")
+    lastname = request.args.get("lastname")
+    address = request.args.get("address")
+    
     format_param = request.args.get("format")
+    
+    qry = "select * from students where 1=1"
+    if firstname:
+        qry += f" AND FirstNAme LIKE '{firstname}%'" 
+    if lastname:
+        qry += f" AND LastName LIKE '{lastname}%'" 
+    if address:
+        qry += f" AND Address LIKE '{address}%'" 
+    
     if format_param and format_param.lower() == 'xml':
-        data = data_fetch("""select * from students""")
+        data = data_fetch(qry)
         xml_data = xmltodict.unparse({"students": {"student":data}})
         response = make_response(xml_data)
         response.headers["Content-Type"] = "application/xml"
         return response
     else:
-        data = data_fetch("""select * from students""")
+        data = data_fetch(qry)
         return make_response(jsonify(data), 200)
 
 

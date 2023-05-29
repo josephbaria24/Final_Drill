@@ -35,6 +35,15 @@ class MyAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue("CNHS" in response.data.decode())
     
+    def test_create_student(self):
+        data = {
+            "FirstNAme": "Shon",
+            "LastName": "Brandon",
+            "Address" : "Bataraza"            
+        }
+        response = self.app.post("/students", json=data)
+        self.assertEqual(response.status_code, 201)
+        
     
 if __name__ == "__main__":
     unittest.main()

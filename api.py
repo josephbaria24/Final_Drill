@@ -40,6 +40,7 @@ def data_fetch(query):
 
 
 @app.route("/students", methods=["GET"])
+@login_reqiured
 def get_students():
     format_param = request.args.get("format")
     if format_param and format_param.lower() == 'xml':
@@ -52,7 +53,9 @@ def get_students():
         data = data_fetch("""select * from students""")
         return make_response(jsonify(data), 200)
 
+
 @app.route("/students/<int:ID>", methods=["GET"])
+@login_reqiured
 def get_student_ID(ID):
     format_param = request.args.get("format")
     if format_param and format_param.lower() == 'xml':
@@ -68,6 +71,7 @@ def get_student_ID(ID):
 
 
 @app.route("/students/<int:ID>/seat", methods=["GET"])
+@login_reqiured
 def get_seat_by_ID(ID):
     format_param = request.args.get("format")
     if format_param and format_param.lower() == 'xml':
@@ -92,6 +96,7 @@ def get_seat_by_ID(ID):
 
 @app.route("/students/<int:ID>/course", methods=["GET"])
 def get_course_by_ID(ID):
+    format_param = request.args.get("format")
     if format_param and format_param.lower() == 'xml':
         data = data_fetch("""
                         select students.FirstNAme, students.LastName, course.Course_name, course.Course_ID
@@ -116,6 +121,7 @@ def get_course_by_ID(ID):
 
 
 @app.route("/students", methods=["POST"])
+@login_reqiured
 def add_student():
     cur = mysql.connection.cursor()
     info = request.get_json()
@@ -135,6 +141,7 @@ def add_student():
 
 
 @app.route("/students/<int:ID>", methods = ["PUT"])
+@login_reqiured
 def update_student(ID):
     cur = mysql.connection.cursor()
     info = request.get_json()
@@ -153,6 +160,7 @@ def update_student(ID):
     return make_response(jsonify({"message": "student updated successfully", "rows_affected":rows_affected}),200,)
 
 @app.route("/students/<int:ID>", methods = ["DELETE"])
+@login_reqiured
 def delete_student(ID):
     cur = mysql.connection.cursor()
     cur.execute(""" delete from students where ID = %s """,(ID,))

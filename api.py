@@ -2,7 +2,7 @@ from flask import Flask, make_response, jsonify, request
 from flask_mysqldb import MySQL
 import xml.etree.ElementTree as ET
 import xmltodict
-
+import functools
 
 app = Flask(__name__)
 app.config["MYSQL_HOST"] = "localhost"
@@ -11,12 +11,21 @@ app.config["MYSQL_PASSWORD"] =  ""
 app.config["MYSQL_DB"] =  "studentdb"
 app.config["MYSQL_CURSORCLASS"] =  "DictCursor"
 
-
 mysql = MySQL(app)
 
+def login_reqiured(f):
+    @functools.wraps(f)
+    def decorated_function(*args, **kwargs):
+        auth = request.authorization
+        if auth and auth.username == "admin" and auth.password== "admin":
+            return f(*args, **kwargs)
+        return make_response('Authentication failed!',401, {'WWW-Authenticate':'Basic realm="Login required!"'})
+    return decorated_function
+    
 
 
 @app.route("/")
+@login_reqiured
 def studentdb():
     return "<p>Student database</p>"
 
@@ -83,13 +92,28 @@ def get_seat_by_ID(ID):
 
 @app.route("/students/<int:ID>/course", methods=["GET"])
 def get_course_by_ID(ID):
-    data = data_fetch("""
-                      select students.FirstNAme, students.LastName, course.Course_name, course.Course_ID
-                      from students inner join course 
-                      on students.ID = course.ID
-                      where students.ID = {}
-                      """.format(ID))
-    return make_response(jsonify(data), 200)
+    if format_param and format_param.lower() == 'xml':
+        data = data_fetch("""
+                        select students.FirstNAme, students.LastName, course.Course_name, course.Course_ID
+                        from students inner join course 
+                        on students.ID = course.ID
+                        where students.ID = {}
+                        """.format(ID))
+        xml_data = xmltodict.unparse({"students": {"student":data}})
+        response = make_response(xml_data)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    else:
+    
+        data = data_fetch("""
+                        select students.FirstNAme, students.LastName, course.Course_name, course.Course_ID
+                        from students inner join course 
+                        on students.ID = course.ID
+                        where students.ID = {}
+                        """.format(ID))
+        return make_response(jsonify(data), 200)
+
+
 
 @app.route("/students", methods=["POST"])
 def add_student():

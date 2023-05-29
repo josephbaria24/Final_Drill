@@ -1,5 +1,8 @@
 from flask import Flask, make_response, jsonify, request
 from flask_mysqldb import MySQL
+import xml.etree.ElementTree as ET
+import xmltodict
+
 
 app = Flask(__name__)
 app.config["MYSQL_HOST"] = "localhost"
@@ -8,7 +11,10 @@ app.config["MYSQL_PASSWORD"] =  ""
 app.config["MYSQL_DB"] =  "studentdb"
 app.config["MYSQL_CURSORCLASS"] =  "DictCursor"
 
+
 mysql = MySQL(app)
+
+
 
 @app.route("/")
 def studentdb():
@@ -26,23 +32,54 @@ def data_fetch(query):
 
 @app.route("/students", methods=["GET"])
 def get_students():
-    data = data_fetch("""select * from students""")
-    return make_response(jsonify(data), 200)
+    format_param = request.args.get("format")
+    if format_param and format_param.lower() == 'xml':
+        data = data_fetch("""select * from students""")
+        xml_data = xmltodict.unparse({"students": {"student":data}})
+        response = make_response(xml_data)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    else:
+        data = data_fetch("""select * from students""")
+        return make_response(jsonify(data), 200)
 
 @app.route("/students/<int:ID>", methods=["GET"])
 def get_student_ID(ID):
-    data = data_fetch("""select * from students where ID = {}""".format(ID))
-    return make_response(jsonify(data), 200)
+    format_param = request.args.get("format")
+    if format_param and format_param.lower() == 'xml':
+        data = data_fetch("""select * from students where ID = {}""".format(ID))
+        xml_data = xmltodict.unparse({"students": {"student":data}})
+        response = make_response(xml_data)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    else:
+        data = data_fetch("""select * from students where ID = {}""".format(ID))
+        return make_response(jsonify(data), 200)
+
+
 
 @app.route("/students/<int:ID>/seat", methods=["GET"])
 def get_seat_by_ID(ID):
-    data = data_fetch("""
-                      select students.FirstNAme, students.LastName, seat.seat_position, seat.seat_no
-                      from students inner join seat 
-                      on students.ID = seat.ID
-                      where students.ID = {}
-                      """.format(ID))
-    return make_response(jsonify(data), 200)
+    format_param = request.args.get("format")
+    if format_param and format_param.lower() == 'xml':
+        data = data_fetch("""
+                        select students.FirstNAme, students.LastName, seat.seat_position, seat.seat_no
+                        from students inner join seat 
+                        on students.ID = seat.ID
+                        where students.ID = {}
+                        """.format(ID))
+        xml_data = xmltodict.unparse({"students": {"student":data}})
+        response = make_response(xml_data)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    else:
+        data = data_fetch("""
+                        select students.FirstNAme, students.LastName, seat.seat_position, seat.seat_no
+                        from students inner join seat 
+                        on students.ID = seat.ID
+                        where students.ID = {}
+                        """.format(ID))
+        return make_response(jsonify(data), 200)
 
 @app.route("/students/<int:ID>/course", methods=["GET"])
 def get_course_by_ID(ID):

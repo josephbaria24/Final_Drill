@@ -30,7 +30,10 @@ class MyAppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue("front" in response.data.decode())
     
-    
+    def test_get_course(self):
+        response = self.app.get("/students/201980020/course")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue("CNHS" in response.data.decode())
     
     
 if __name__ == "__main__":

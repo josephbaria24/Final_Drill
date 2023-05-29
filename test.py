@@ -44,6 +44,16 @@ class MyAppTests(unittest.TestCase):
         response = self.app.post("/students", json=data)
         self.assertEqual(response.status_code, 201)
         
+    def test_update_student(self):
+        data = {
+            "FirstNAme": "Ivan",
+            "LastName": "Delosreyes",
+            "Address" : "Brookes",
+            "ID": 201980065           
+        }
+        response = self.app.post("/students", json=data)
+        self.assertEqual(response.status_code, 201)
+    
     
 if __name__ == "__main__":
     unittest.main()
